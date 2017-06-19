@@ -1,5 +1,5 @@
 /*
- * Riddle embed.js v3.11
+ * Riddle embed.js v3.12
  * Copyright Riddle, Inc.
  */
 (function () {
