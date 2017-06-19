@@ -179,6 +179,10 @@
                 // add small offset
                 window.scrollBy(0, -10);
             }
+
+            if (event.data.redirectToCustomLandingpage != undefined) {
+                window.location.href = event.data.redirectToCustomLandingpage;
+            }
         }
     }
 })();
