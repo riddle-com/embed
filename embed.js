@@ -1,5 +1,5 @@
 /*
- * Riddle embed.js v3.12
+ * Riddle embed.js v3.13
  * Copyright Riddle, Inc.
  */
 (function () {
@@ -180,8 +180,25 @@
                 window.scrollBy(0, -10);
             }
 
-            if (event.data.redirectToCustomLandingpage != undefined) {
-                window.location.href = event.data.redirectToCustomLandingpage;
+            if (event.data.redirectToCustomLandingpagePath != undefined
+                && event.data.redirectToCustomLandingpageData != undefined) {
+                var path = event.data.redirectToCustomLandingpagePath;
+                var data = event.data.redirectToCustomLandingpageData;
+
+                var form = window.parent.document.createElement("form");
+                form.setAttribute("method", "post");
+                form.setAttribute("action", path);
+
+                var hiddenField = window.parent.document.createElement("input");
+                hiddenField.setAttribute("type", "hidden");
+                hiddenField.setAttribute("name", "data");
+                hiddenField.setAttribute("value", data);
+
+                form.appendChild(hiddenField);
+
+                window.parent.document.body.appendChild(form);
+
+                form.submit();
             }
         }
     }
