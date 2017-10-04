@@ -1,8 +1,8 @@
 /*
- * Riddle embed.js v3.13
+ * Riddle embed.js v3.14
  * Copyright Riddle, Inc.
  */
-(function () {
+(function() {
     // check whether riddle API was initialised
     if (!window.riddleAPI) {
         initialise();
@@ -58,7 +58,7 @@
                 return;
             }
             element.innerHTML +=
-                    '<iframe src="' + url + '"></iframe>';
+                '<iframe src="' + url + '"></iframe>';
         }
 
         var iframeStyle = iframes[0].style;
@@ -74,67 +74,75 @@
             var colorFg = element.getAttribute("data-fg") || "#1486cd";
             var colorBg = element.getAttribute("data-bg") || "#fff";
             element.insertAdjacentHTML('beforeend',
-                    '<style>' +
-                    '[' + riddleId + '] .rid-load {' +
-                    'background: ' + colorBg + ';' +
-                    '}' +
-                    '[' + riddleId + '] .rid-load i {' +
-                    'background: ' + colorFg + ';' +
-                    '}' +
-                    '.rid-load {' +
-                    'border: 1px solid #cfcfcf!important;' +
-                    'padding-top: 56%;' +
-                    'border-radius: 5px;' +
-                    'position: relative;' +
-                    '}' +
-                    '.rid-load p {' +
-                    'position: absolute;' +
-                    'top: 50%;' +
-                    'left: 50%;' +
-                    'margin: -8px' +
-                    '}' +
-                    '.rid-load i {' +
-                    'position: absolute;' +
-                    'width: 16px;' +
-                    'height: 16px;' +
-                    'border-radius: 3px;' +
-                    'left: -25px;' +
-                    '-webkit-animation: 1s infinite rid-icon;' +
-                    'animation: 1s infinite rid-icon;' +
-                    '-webkit-transform: scale(.4) rotate(62deg);' +
-                    'transform: scale(.4) rotate(62deg);' +
-                    'opacity: 0;' +
-                    '}' +
-                    '.rid-load i+i {' +
-                    '-webkit-animation-delay: .17s;' +
-                    'animation-delay: .17s;' +
-                    'left: 0;' +
-                    '}' +
-                    '.rid-load i+i+i {' +
-                    '-webkit-animation-delay: .34s;' +
-                    'animation-delay: .34s;' +
-                    'left: 25px;' +
-                    '}' +
-                    '@-webkit-keyframes rid-icon {' +
-                    '50% {' +
-                    '   opacity: 1;' +
-                    '-webkit-transform: scale(1) rotate(62deg);' +
-                    '}' +
-                    '}' +
-                    '@keyframes rid-icon {' +
-                    '50% {' +
-                    'opacity: 1;' +
-                    'transform: scale(1) rotate(62deg);' +
-                    '}' +
-                    '}' +
-                    '</style>' +
-                    '<div class="rid-load"><p><i></i><i></i><i></i></p></div>'
-                    );
+                '<style>' +
+                '[' + riddleId + '] .rid-load {' +
+                'background: ' + colorBg + ';' +
+                '}' +
+                '[' + riddleId + '] .rid-load i {' +
+                'background: ' + colorFg + ';' +
+                '}' +
+                '.rid-load {' +
+                'border: 1px solid #cfcfcf!important;' +
+                'padding-top: 56%;' +
+                'border-radius: 5px;' +
+                'position: relative;' +
+                '}' +
+                '.rid-load p {' +
+                'position: absolute;' +
+                'top: 50%;' +
+                'left: 50%;' +
+                'margin: -8px' +
+                '}' +
+                '.rid-load i {' +
+                'position: absolute;' +
+                'width: 16px;' +
+                'height: 16px;' +
+                'border-radius: 3px;' +
+                'left: -25px;' +
+                '-webkit-animation: 1s infinite rid-icon;' +
+                'animation: 1s infinite rid-icon;' +
+                '-webkit-transform: scale(.4) rotate(62deg);' +
+                'transform: scale(.4) rotate(62deg);' +
+                'opacity: 0;' +
+                '}' +
+                '.rid-load i+i {' +
+                '-webkit-animation-delay: .17s;' +
+                'animation-delay: .17s;' +
+                'left: 0;' +
+                '}' +
+                '.rid-load i+i+i {' +
+                '-webkit-animation-delay: .34s;' +
+                'animation-delay: .34s;' +
+                'left: 25px;' +
+                '}' +
+                '@-webkit-keyframes rid-icon {' +
+                '50% {' +
+                '   opacity: 1;' +
+                '-webkit-transform: scale(1) rotate(62deg);' +
+                '}' +
+                '}' +
+                '@keyframes rid-icon {' +
+                '50% {' +
+                'opacity: 1;' +
+                'transform: scale(1) rotate(62deg);' +
+                '}' +
+                '}' +
+                '</style>' +
+                '<div class="rid-load"><p><i></i><i></i><i></i></p></div>'
+            );
         }
 
         // store reference
         riddleAPI.riddles.push(element);
     }
+
+    var scrollPosition = 0;
+    document.addEventListener("scroll", function(e) {
+        if (scrollPosition != 0) {
+            document.getElementsByTagName('body')[0].scrollTop = scrollPosition;
+            scrollPosition = 0;
+        }
+    });
 
     function onWindowMessage(event) {
         // number type required for height update
@@ -178,10 +186,12 @@
                 iframe.scrollIntoView(true);
                 // add small offset
                 window.scrollBy(0, -10);
+            } else if (event.data.riddleEvent == "page-change" && element.getAttribute("data-auto-scroll") == "false") {
+                scrollPosition = document.getElementsByTagName('body')[0].scrollTop;
             }
 
-            if (event.data.redirectToCustomLandingpagePath != undefined
-                && event.data.redirectToCustomLandingpageData != undefined) {
+            if (event.data.redirectToCustomLandingpagePath != undefined &&
+                event.data.redirectToCustomLandingpageData != undefined) {
                 var path = event.data.redirectToCustomLandingpagePath;
                 var data = event.data.redirectToCustomLandingpageData;
 
