@@ -1,5 +1,5 @@
 /*
- * Riddle embed.js v3.14
+ * Riddle embed.js v3.15
  * Copyright Riddle, Inc.
  */
 (function() {
@@ -139,7 +139,7 @@
     var scrollPosition = 0;
     document.addEventListener("scroll", function(e) {
         if (scrollPosition != 0) {
-            document.getElementsByTagName('body')[0].scrollTop = scrollPosition;
+            window.scrollTo(0, scrollPosition);
             scrollPosition = 0;
         }
     });
@@ -187,7 +187,8 @@
                 // add small offset
                 window.scrollBy(0, -10);
             } else if (event.data.riddleEvent == "page-change" && element.getAttribute("data-auto-scroll") == "false") {
-                scrollPosition = document.getElementsByTagName('body')[0].scrollTop;
+                var doc = document.documentElement;
+                scrollPosition = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
             }
 
             if (event.data.redirectToCustomLandingpagePath != undefined &&
