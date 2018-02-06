@@ -1,5 +1,5 @@
 /*
- * Riddle embed.js v3.17
+ * Riddle embed.js v3.18
  * Copyright Riddle, Inc.
  */
 (function() {
@@ -46,6 +46,12 @@
         // for riddle specific styling
         var riddleId = "data-riddle-" + riddleAPI.riddles.length;
         element.setAttribute(riddleId, "");
+
+        try {
+            if (element.nextSibling.nextSibling.innerText == 'Quiz Maker - powered by Riddle') {
+                element.nextSibling.parentNode.removeChild(element.nextSibling.nextSibling);
+            }
+        } catch (e) {}
 
         // check whether we need to add iframe (legacy riddles don't have one)
         var iframes = element.getElementsByTagName("iframe");
