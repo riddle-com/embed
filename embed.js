@@ -1,5 +1,5 @@
 /*
- * Riddle embed.js v3.17
+ * Riddle embed.js v3.18
  * Copyright Riddle, Inc.
  */
 (function() {
@@ -66,10 +66,6 @@
         iframeStyle.width = "100%";
         iframeStyle.position = "absolute";
         iframeStyle.opacity = 0;
-
-        if (window.location.href.indexOf('?') != -1) {
-            iframes[0].src = iframes[0].src + window.location.href.split('?')[1];
-        }
 
         // check whether we can add a loader (legacy riddles already have them)
         var loader = element.getElementsByClassName("rid-load");
@@ -148,6 +144,14 @@
         }
     });
 
+    function postQueryStringToRiddle(element) {
+        var iframes = element.getElementsByTagName("iframe");
+
+        iframes[0].contentWindow.postMessage({
+            riddleQueryString: window.location.href.split('?')[1]
+        }, '*');
+    }
+
     function onWindowMessage(event) {
         // number type required for height update
         if (typeof event.data != "object") {
@@ -184,6 +188,10 @@
                         riddleHeight: event.data.riddleHeight + 55,
                         riddleId: event.data.riddleId
                     }, '*');
+                }
+
+                if (window.location.href.indexOf('?') != -1) {
+                    postQueryStringToRiddle(element);
                 }
             }
 
