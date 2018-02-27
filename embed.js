@@ -1,5 +1,5 @@
 /*
- * Riddle embed.js v3.18
+ * Riddle embed.js v3.19
  * Copyright Riddle, Inc.
  */
 (function() {
@@ -144,6 +144,11 @@
         }
     });
 
+    function preventSiteJump() {
+        var doc = document.documentElement;
+        scrollPosition = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
+    }
+
     function postQueryStringToRiddle(element) {
         var iframes = element.getElementsByTagName("iframe");
 
@@ -206,8 +211,11 @@
                 // add small offset
                 window.scrollBy(0, -10);
             } else if (event.data.riddleEvent == "page-change" && element.getAttribute("data-auto-scroll") == "false") {
-                var doc = document.documentElement;
-                scrollPosition = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
+                preventSiteJump()
+            }
+
+            if (event.data.riddleEvent && event.data.riddleEvent.action == 'answer-poll' && element.getAttribute("data-auto-scroll") == "false") {
+                preventSiteJump()
             }
 
             if (event.data.redirectToCustomLandingpagePath != undefined &&
