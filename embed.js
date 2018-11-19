@@ -1,6 +1,6 @@
 /*
- * Riddle embed.js v3.19
- * Copyright Riddle, Inc.
+ * Riddle embed.js v3.20
+ * Copyright Riddle Technologies AG.
  */
 (function() {
     // check whether riddle API was initialised
@@ -18,7 +18,10 @@
             // check for new riddles on page
             update: checkForNewRiddles,
             // list of initialised riddles
-            riddles: []
+            riddles: [],
+            // enter or exit fullscreen
+            toggleFullScreen: toggleFullScreen,
+            isFullScreen: false
         }
         // listen for resize events coming from riddles
         window.addEventListener("message", onWindowMessage, false);
@@ -27,6 +30,96 @@
             document.addEventListener("DOMContentLoaded", checkForNewRiddles);
         } else {
             checkForNewRiddles();
+        }
+    }
+
+    var originalWidth;
+
+    function toggleFullScreen(riddleId) {
+        var iframeWrapper = document.querySelectorAll('[data-rid-id="' + riddleId + '"]');
+        var iframe = iframeWrapper[0].getElementsByTagName("iframe")[0];
+        var button = document.getElementById('riddleFullScreenButton-' + riddleId);
+        var elem = document.body;
+
+        if (originalWidth == undefined) {
+            originalWidth = iframeWrapper[0].style['width'];
+        }
+
+        if (window.riddleAPI.isFullScreen == false) {
+            requestFullScreen(elem, iframeWrapper[0], iframe, button);
+        } else {
+            exitFullScreen(iframeWrapper[0], iframe, button);
+        }
+    }
+
+    function requestFullScreen(docElm, iframeWrapper, iframe, button) {
+        var eventName = '';
+
+        if (docElm.requestFullscreen) {
+            docElm.requestFullscreen();
+            eventName = 'fullscreenchange';
+
+        } else if (docElm.msRequestFullscreen) {
+            docElm.msRequestFullscreen();
+            eventName = 'MSFullscreenChange';
+        } else if (docElm.mozRequestFullScreen) {
+            docElm.mozRequestFullScreen();
+            eventName = 'mozfullscreenchange';
+        } else if (docElm.webkitRequestFullScreen) {
+            docElm.webkitRequestFullScreen();
+            eventName = 'webkitfullscreenchange';
+        }
+
+        document.addEventListener(eventName, function() {
+            fullscreenChange(iframeWrapper, iframe, button);
+        });
+    }
+
+    function exitFullScreen(iframeWrapper, iframe, button) {
+        var eventName = '';
+
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        }
+
+        fullscreenChange(iframeWrapper, iframe, button);
+    }
+
+    function fullscreenChange(iframeWrapper, iframe, button) {
+        if (document.fullscreenEnabled ||
+            document.webkitIsFullScreen ||
+            document.mozFullScreen ||
+            document.msFullscreenElement) {
+
+            iframeWrapper.style.position = 'fixed';
+            iframeWrapper.style.width = '100%';
+            iframeWrapper.style.top = '0';
+            iframeWrapper.style.left = '0';
+            iframeWrapper.style.background = "#fff";
+            iframeWrapper.style.setProperty("height", "100%", "important");
+            iframe.style.setProperty("height", "100%", "important");
+
+            button.style.position = 'fixed';
+            button.style.bottom = '20px';
+            button.style.left = '48%';
+
+            window.riddleAPI.isFullScreen = true;
+        } else {
+            iframeWrapper.style.position = 'static';
+            iframeWrapper.style.top = '0';
+            iframeWrapper.style.left = '0';
+            iframeWrapper.style.width = originalWidth;
+            iframeWrapper.style.setProperty("height", "auto");
+
+            button.style.position = 'static';
+
+            window.riddleAPI.isFullScreen = false;
         }
     }
 
@@ -176,7 +269,9 @@
             if (event.data.riddleHeight) {
                 // update height
                 var iframeStyle = iframe.style;
-                iframeStyle.setProperty("height", event.data.riddleHeight + "px", "important");
+                if (!window.riddleAPI.isFullScreen) {
+                    iframeStyle.setProperty("height", event.data.riddleHeight + "px", "important");
+                }
                 if (iframeStyle.opacity == 0) {
                     // this is the first size event coming from this riddle, show it
                     iframeStyle.opacity = 1;
