@@ -1,5 +1,5 @@
 /*
- * Riddle embed.js v3.20
+ * Riddle embed.js v3.21
  * Copyright Riddle Technologies AG.
  */
 (function() {
@@ -235,7 +235,26 @@
             window.scrollTo(0, scrollPosition);
             scrollPosition = 0;
         }
+
+        // send position data to riddle iframes
+        sendPositionData();
     });
+
+    function sendPositionData() {
+        for (var i = 0; i < riddleAPI.riddles.length; i++) {
+            var element = riddleAPI.riddles[i];
+            var iframe = element.getElementsByTagName("iframe")[0];
+            var iframeOffetTop = iframe.offsetTop;
+            var viewtop = window.scrollY;
+            var viewbottom = viewtop + window.innerHeight;
+
+            iframe.contentWindow.postMessage({
+                iframeOffetTop: iframeOffetTop,
+                viewtop: viewtop,
+                viewbottom: viewbottom
+            }, '*');
+        }
+    }
 
     function preventSiteJump() {
         var doc = document.documentElement;
@@ -293,6 +312,9 @@
                 if (window.location.href.indexOf('?') != -1) {
                     postQueryStringToRiddle(element);
                 }
+
+                // send position data to riddle iframes
+                sendPositionData();
             }
 
             if (event.data.riddleEvent && window.onRiddleEvent) {
@@ -302,11 +324,21 @@
 
             if (event.data.riddleEvent == "page-change" && element.getAttribute("data-auto-scroll") != "false") {
                 // scroll to top of riddle
+                var offset = 0;
+
+                if (!isNaN(element.getAttribute("data-auto-scroll-offset"))) {
+                    offset = element.getAttribute("data-auto-scroll-offset");
+                }
+
                 iframe.scrollIntoView(true);
                 // add small offset
-                window.scrollBy(0, -10);
+                window.scrollBy(0, -10 - offset);
+                // send position data to riddle iframes
+                sendPositionData();
             } else if (event.data.riddleEvent == "page-change" && element.getAttribute("data-auto-scroll") == "false") {
                 preventSiteJump()
+                // send position data to riddle iframes
+                sendPositionData();
             }
 
             if (event.data.riddleEvent && event.data.riddleEvent.action == 'answer-poll' && element.getAttribute("data-auto-scroll") == "false") {
