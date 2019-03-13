@@ -1,5 +1,5 @@
 /*
- * Riddle embed.js v3.21
+ * Riddle embed.js v3.22
  * Copyright Riddle Technologies AG.
  */
 (function() {
@@ -244,8 +244,8 @@
         for (var i = 0; i < riddleAPI.riddles.length; i++) {
             var element = riddleAPI.riddles[i];
             var iframe = element.getElementsByTagName("iframe")[0];
-            var iframeOffetTop = iframe.offsetTop;
-            var viewtop = window.scrollY;
+            var iframeOffetTop = iframe.getBoundingClientRect().top + window.scrollY || window.pageYOffset;
+            var viewtop = window.scrollY || window.pageYOffset;
             var viewbottom = viewtop + window.innerHeight;
 
             iframe.contentWindow.postMessage({
