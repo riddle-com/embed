@@ -1,5 +1,5 @@
 /*
- * Riddle embed.js v3.22
+ * Riddle embed.js v3.23
  * Copyright Riddle Technologies AG.
  */
 (function() {
@@ -322,7 +322,7 @@
                 window.onRiddleEvent(event.data.riddleEvent, iframe);
             }
 
-            if (event.data.riddleEvent == "page-change" && element.getAttribute("data-auto-scroll") != "false") {
+            if (event.data.riddleEvent == "page-change" && element.getAttribute("data-auto-scroll") != "false" && !event.data.isUnrolledQuiz) {
                 // scroll to top of riddle
                 var offset = 0;
 
