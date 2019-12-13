@@ -1,5 +1,5 @@
 /*
- * Riddle embed.js v3.23
+ * Riddle embed.js v3.3
  * Copyright Riddle Technologies AG.
  */
 (function() {
@@ -152,7 +152,7 @@
             }
             element.innerHTML +=
                 '<iframe src="' + url + '"></iframe>';
-        }
+        } 
 
         var iframeStyle = iframes[0].style;
         iframeStyle.border = "none";
@@ -227,6 +227,8 @@
 
         // store reference
         riddleAPI.riddles.push(element);
+
+        sendPositionData()
     }
 
     var scrollPosition = 0;
@@ -253,6 +255,27 @@
                 viewtop: viewtop,
                 viewbottom: viewbottom
             }, '*');
+
+            checkIframe(iframeOffetTop, viewtop, viewbottom, iframe); 
+        }
+    }
+
+    function checkIframe(iframeOffetTop, viewtop, viewbottom, iframe) {
+        if (iframeOffetTop != undefined && viewtop != undefined && viewbottom != undefined &&
+            iframe.src != iframe.parentElement.getAttribute("data-embed-url") &&
+            iframe.src.indexOf("riddle.com") == -1
+        ) {
+            var iframeOffsetBottom = iframeOffetTop + iframe.parentElement.getBoundingClientRect().height;
+
+            // iframe top is in viewport
+            var iframeTopIsVisible = viewtop <= iframeOffetTop && iframeOffetTop <= viewbottom;
+
+            // iframe bottom is in viewport
+            var iframeBottomIsVisible = viewtop <= iframeOffsetBottom && iframeOffsetBottom <= viewbottom;
+
+            if (iframeTopIsVisible || iframeBottomIsVisible) {
+                iframe.src = iframe.parentElement.getAttribute("data-embed-url");
+            }
         }
     }
 
