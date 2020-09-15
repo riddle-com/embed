@@ -1,5 +1,5 @@
 /*
- * Riddle embed.js v3.3
+ * Riddle embed.js v3.4
  * Copyright Riddle Technologies AG.
  */
 (function() {
@@ -292,6 +292,14 @@
         }, '*');
     }
 
+    function postLocationHrefToRiddle(element) {
+        var iframes = element.getElementsByTagName("iframe");
+
+        iframes[0].contentWindow.postMessage({
+            riddleParentLocation: window.location.href
+        }, '*');
+    }
+
     function onWindowMessage(event) {
         // number type required for height update
         if (typeof event.data != "object") {
@@ -335,6 +343,8 @@
                 if (window.location.href.indexOf('?') != -1) {
                     postQueryStringToRiddle(element);
                 }
+
+                postLocationHrefToRiddle(element);
 
                 // send position data to riddle iframes
                 sendPositionData();
