@@ -199,6 +199,22 @@
         isRiddleApi: true,
         type: "requestRiddleStatus"
       });
+      this.sendEmbedConfig();
+    }
+    sendEmbedConfig() {
+      this.sendMessage({
+        isRiddleApi: true,
+        type: "updateEmbedConfig",
+        embedConfig: {
+          autoScroll: {
+            isEnabled: this.config.autoScroll,
+            isOffsetEnabled: this.config.autoScrollOffset !== 0,
+            offset: this.config.autoScrollOffset
+          },
+          isFixedHeightEnabled: this.config.isFixedHeightEnabled,
+          fixedHeight: this.config.fixedHeight
+        }
+      });
     }
     sendMessage(msg) {
       this.iframe.contentWindow?.postMessage(msg, "*");
@@ -213,6 +229,7 @@
           iframeStyle.height = this.config.fixedHeight;
         }
         RemoveLoader(this);
+        this.sendEmbedConfig();
       }
     }
     UpdateHeight(height) {
@@ -892,6 +909,9 @@
       if (riddleEvent2.type === "AnswerPoll" && !riddle.config.autoScroll) {
         preventSiteJump();
       }
+      if (riddleEvent2.type === "ScrollRequest" && riddleEvent2.scrollRequest) {
+        handleScrollRequest(riddleEvent2.scrollRequest);
+      }
       if (riddleEvent2.redirectToCustomLandingPage) {
         const path = riddleEvent2.redirectToCustomLandingPage.path;
         const data = riddleEvent2.redirectToCustomLandingPage.data;
@@ -910,14 +930,39 @@
       riddle2API.msgBacklog.push(event);
     }
   }
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
   let scrollPosition = 0;
-  document.addEventListener("scroll", function(e) {
+  const debouncedScrollHandler = debounce(function() {
     if (scrollPosition != 0) {
       window.scrollTo(0, scrollPosition);
       scrollPosition = 0;
     }
     sendPositionDataToIframes();
-  });
+  }, 16);
+  document.addEventListener("scroll", debouncedScrollHandler);
+  const debouncedSendPositionData = debounce(sendPositionDataToIframes, 150);
+  window.addEventListener("resize", debouncedSendPositionData);
+  function handleScrollRequest(scrollRequest) {
+    const scrollAmount = scrollRequest.direction === "up" ? -scrollRequest.speed : scrollRequest.speed;
+    const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const newScrollTop = Math.max(0, currentScrollTop + scrollAmount);
+    window.scrollTo({
+      top: newScrollTop,
+      behavior: "auto"
+      // Use "auto" for immediate scrolling during drag
+    });
+    sendPositionDataToIframes();
+  }
   function sendPositionDataToIframes() {
     for (const riddle of riddle2API.riddles) {
       var iframeOffsetTop = riddle.iframe.getBoundingClientRect().top + window.scrollY || window.pageYOffset;
